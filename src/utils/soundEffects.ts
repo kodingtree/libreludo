@@ -1,4 +1,4 @@
-type TSoundEffect = 'diceRoll' | 'pieceMove' | 'pieceCapture';
+type TSoundEffect = 'diceRoll' | 'pieceMove' | 'pieceCapture' | 'pieceReturn' | 'pieceHome';
 
 type TNote = {
   frequency: number;
@@ -7,25 +7,38 @@ type TNote = {
 
 const SOUND_SEQUENCES: Record<TSoundEffect, TNote[]> = {
   diceRoll: [
-    { frequency: 260, durationMs: 45 },
-    { frequency: 320, durationMs: 45 },
-    { frequency: 380, durationMs: 65 },
+    { frequency: 220, durationMs: 35 },
+    { frequency: 280, durationMs: 35 },
+    { frequency: 340, durationMs: 40 },
+    { frequency: 420, durationMs: 60 },
   ],
   pieceMove: [
     { frequency: 520, durationMs: 35 },
     { frequency: 660, durationMs: 50 },
   ],
   pieceCapture: [
-    { frequency: 460, durationMs: 45 },
-    { frequency: 360, durationMs: 45 },
-    { frequency: 240, durationMs: 95 },
+    { frequency: 540, durationMs: 40 },
+    { frequency: 390, durationMs: 45 },
+    { frequency: 250, durationMs: 95 },
+  ],
+  pieceReturn: [
+    { frequency: 300, durationMs: 50 },
+    { frequency: 250, durationMs: 55 },
+    { frequency: 200, durationMs: 70 },
+  ],
+  pieceHome: [
+    { frequency: 520, durationMs: 55 },
+    { frequency: 660, durationMs: 55 },
+    { frequency: 820, durationMs: 90 },
   ],
 };
 
 const SOUND_VOLUMES: Record<TSoundEffect, number> = {
-  diceRoll: 0.08,
+  diceRoll: 0.1,
   pieceMove: 0.06,
   pieceCapture: 0.1,
+  pieceReturn: 0.08,
+  pieceHome: 0.1,
 };
 
 let audioContext: AudioContext | null = null;

@@ -55,7 +55,10 @@ export const useMoveTokenForward = () => {
             const hasPlayerWon =
               hasTokenReachedHome &&
               player.tokens.filter((t) => t.hasTokenReachedHome).length === 3;
-            if (hasTokenReachedHome) dispatch(markTokenAsReachedHome({ colour, id }));
+            if (hasTokenReachedHome) {
+              playSoundEffect('pieceHome');
+              dispatch(markTokenAsReachedHome({ colour, id }));
+            }
             tokenEl.removeEventListener('transitionend', handleTransitionEnd);
             dispatch(setIsAnyTokenMoving(false));
             resolve({

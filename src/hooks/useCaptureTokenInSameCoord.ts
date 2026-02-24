@@ -93,6 +93,7 @@ export function useCaptureTokenInSameCoord() {
             // Trigger the first transition
             if (isFirstCapture) isFirstCapture = false;
             else await sleep(60);
+            playSoundEffect('pieceReturn');
             index--;
             const { x, y } = getPosition(tokenPath[index], defaultTokenAlignmentData);
             tokenEl.style.transform = `translate(${x}, ${y})`;
