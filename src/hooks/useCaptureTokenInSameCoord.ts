@@ -22,6 +22,7 @@ import { TOKEN_SAFE_COORDINATES } from '../game/tokens/constants';
 import { getTokenDOMId, tokensWithCoord } from '../game/tokens/logic';
 import { tokenPaths } from '../game/tokens/paths';
 import { sleep } from '../utils/sleep';
+import { playSoundEffect } from '../utils/soundEffects';
 
 export function useCaptureTokenInSameCoord() {
   const dispatch = useDispatch();
@@ -44,6 +45,8 @@ export function useCaptureTokenInSameCoord() {
         );
 
         if (capturableTokens.length === 0) return resolve(false);
+
+        playSoundEffect('pieceCapture');
 
         capturableTokens.forEach(({ colour, id }) => {
           dispatch(
@@ -89,7 +92,7 @@ export function useCaptureTokenInSameCoord() {
             };
             // Trigger the first transition
             if (isFirstCapture) isFirstCapture = false;
-            else await sleep(250);
+            else await sleep(120);
             index--;
             const { x, y } = getPosition(tokenPath[index], defaultTokenAlignmentData);
             tokenEl.style.transform = `translate(${x}, ${y})`;
