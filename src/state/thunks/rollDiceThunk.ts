@@ -3,7 +3,7 @@ import type { TPlayerColour } from '../../types';
 import type { AppDispatch, RootState } from '../store';
 import { playSoundEffect } from '../../utils/soundEffects';
 
-const DICE_PLACEHOLDER_DELAY = 450;
+const DICE_PLACEHOLDER_DELAY = 225;
 
 export function rollDiceThunk(colour: TPlayerColour, onDiceRoll: (diceNumber: number) => void) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
