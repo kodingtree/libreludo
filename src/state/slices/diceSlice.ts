@@ -5,25 +5,16 @@ import type { TDice } from '../../types';
 
 export type TDiceState = {
   dice: TDice[];
-  rollBag: Record<TPlayerColour, number[]>;
 };
 
 export const initialState: TDiceState = {
   dice: [],
-  rollBag: { blue: [], red: [], green: [], yellow: [] },
 };
 
 export function getDice(state: TDiceState, colour: TPlayerColour): TDice {
   const dice = state.dice.find((d) => d.colour === colour);
   if (!dice) throw new Error(ERRORS.diceDoesNotExist(colour));
   return dice;
-}
-
-export function generateRollBag(): number[] {
-  const diceNumbers = Array(36)
-    .fill(null)
-    .map((_, i) => (i % 6) + 1);
-  return diceNumbers;
 }
 
 const reducers = {
@@ -33,7 +24,6 @@ const reducers = {
       diceNumber: 1,
       isPlaceholderShowing: false,
     });
-    state.rollBag[action.payload] = generateRollBag();
   },
   setIsPlaceholderShowing: (
     state: TDiceState,
@@ -44,16 +34,10 @@ const reducers = {
   },
   setDiceNumber: (
     state: TDiceState,
-    action: PayloadAction<{ colour: TPlayerColour; randomIndex: number }>
+    action: PayloadAction<{ colour: TPlayerColour; diceNumber: number }>
   ) => {
     const dice = getDice(state, action.payload.colour);
-    dice.diceNumber = state.rollBag[action.payload.colour][action.payload.randomIndex];
-    state.rollBag[action.payload.colour] = state.rollBag[action.payload.colour].filter(
-      (_, i) => i !== action.payload.randomIndex
-    );
-  },
-  renewRollBag: (state: TDiceState, action: PayloadAction<TPlayerColour>) => {
-    state.rollBag[action.payload] = generateRollBag();
+    dice.diceNumber = action.payload.diceNumber;
   },
   clearDiceState: () => structuredClone(initialState),
 };
@@ -68,7 +52,6 @@ export const {
   registerDice,
   setDiceNumber,
   setIsPlaceholderShowing,
-  renewRollBag,
   clearDiceState,
 } = diceSlice.actions;
 

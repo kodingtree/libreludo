@@ -30,7 +30,7 @@ function GameFinishedScreen({ playerFinishOrder }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <span className={styles.gameFinishedText}>GAME FINISHED!</span>
+          <span className={styles.gameFinishedText}>Match Results</span>
           <section className={styles.gameResult}>
             {playerFinishOrder.map((p, i) => (
               <GameFinishPlayerItem

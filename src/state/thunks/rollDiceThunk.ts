@@ -1,4 +1,4 @@
-import { renewRollBag, setDiceNumber, setIsPlaceholderShowing } from '../slices/diceSlice';
+import { setDiceNumber, setIsPlaceholderShowing } from '../slices/diceSlice';
 import type { TPlayerColour } from '../../types';
 import type { AppDispatch, RootState } from '../store';
 import { playSoundEffect } from '../../utils/soundEffects';
@@ -11,14 +11,10 @@ export function rollDiceThunk(colour: TPlayerColour, onDiceRoll: (diceNumber: nu
     dispatch(setIsPlaceholderShowing({ colour, isPlaceholderShowing: true }));
     playSoundEffect('diceRoll');
     setTimeout(() => {
-      const diceState = getState().dice;
-      const dice = diceState.dice.find((d) => d.colour === colour);
-      if (diceState.rollBag[colour].length === 0) dispatch(renewRollBag(colour));
-      const bag = getState().dice.rollBag[colour];
-      const index = Math.floor(Math.random() * bag.length);
-      const diceNumber = bag[index];
+      const dice = getState().dice.dice.find((d) => d.colour === colour);
+      const diceNumber = Math.floor(Math.random() * 6) + 1;
       dispatch(setIsPlaceholderShowing({ colour, isPlaceholderShowing: false }));
-      dispatch(setDiceNumber({ colour, randomIndex: index }));
+      dispatch(setDiceNumber({ colour, diceNumber }));
       if (dice) onDiceRoll(diceNumber);
     }, DICE_PLACEHOLDER_DELAY);
   };

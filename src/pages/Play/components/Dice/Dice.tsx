@@ -22,6 +22,21 @@ type Props = {
   onDiceClick: (colour: TPlayerColour, diceNumber: number) => void;
 };
 
+function getOrdinalRank(rank: number): string {
+  const mod100 = rank % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${rank}th`;
+  switch (rank % 10) {
+    case 1:
+      return `${rank}st`;
+    case 2:
+      return `${rank}nd`;
+    case 3:
+      return `${rank}rd`;
+    default:
+      return `${rank}th`;
+  }
+}
+
 function getDiceImage(diceNumber: number | undefined): string {
   switch (diceNumber) {
     case 1:
@@ -48,6 +63,7 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
     isGameEnded,
     currentPlayerColour: currentPlayer,
     players,
+    playerFinishOrder,
   } = useSelector((state: RootState) => state.players);
   const { diceNumber, isPlaceholderShowing } =
     useSelector((state: RootState) => state.dice.dice.find((d) => d.colour === colour)) ?? {};
@@ -57,6 +73,7 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
     [colour, players]
   );
   const isBot = players.find((p) => p.colour === colour)?.isBot;
+  const rank = playerFinishOrder.findIndex((p) => p.colour === colour) + 1;
   const isCurrentPlayer = currentPlayer === colour;
   const isDiceDisabled =
     !isCurrentPlayer ||
@@ -97,7 +114,20 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
           aria-hidden="true"
         />
       </button>
-      <span className={styles.playerName}>{playerName}</span>
+      <span className={styles.playerMeta}>
+        <span className={styles.playerName}>{playerName}</span>
+        {rank > 0 && (
+          <span
+            className={clsx(styles.rankBadge, {
+              [styles.rankFirst]: rank === 1,
+              [styles.rankSecond]: rank === 2,
+              [styles.rankThird]: rank === 3,
+            })}
+          >
+            {getOrdinalRank(rank)}
+          </span>
+        )}
+      </span>
     </div>
   );
 }

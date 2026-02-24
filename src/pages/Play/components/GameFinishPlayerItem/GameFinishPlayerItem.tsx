@@ -1,9 +1,6 @@
 import { type TPlayer, type TPlayerColour } from '../../../../types';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../state/store';
-import rank1Image from '../../../../assets/player_rank_images/1.png';
-import rank2Image from '../../../../assets/player_rank_images/2.png';
-import rank3Image from '../../../../assets/player_rank_images/3.png';
 import { AnimatePresence, motion } from 'framer-motion';
 import { playerColours } from '../../../../game/players/constants';
 import styles from './GameFinishPlayerItem.module.css';
@@ -25,21 +22,22 @@ function getTimeString(startTime: number, finishTime: number, inactiveTime: numb
   return `${minutesStr}:${secondsStr}`;
 }
 
-function getRankImage(rank: number): string {
-  switch (rank) {
+function getOrdinalRank(rank: number): string {
+  const mod100 = rank % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${rank}th`;
+  switch (rank % 10) {
     case 1:
-      return rank1Image;
+      return `${rank}st`;
     case 2:
-      return rank2Image;
+      return `${rank}nd`;
     case 3:
-      return rank3Image;
+      return `${rank}rd`;
     default:
-      throw new Error('Invalid rank');
+      return `${rank}th`;
   }
 }
 
 function GameFinishPlayerItem({ colour, isLast, name, rank }: Props) {
-  const { boardTileSize } = useSelector((state: RootState) => state.board);
   const { players } = useSelector((state: RootState) => state.players);
   const { gameStartTime, gameInactiveTime } = useSelector((state: RootState) => state.session);
   const { playerFinishTime } = players.find((p) => p.colour === colour) as TPlayer;
@@ -52,18 +50,14 @@ function GameFinishPlayerItem({ colour, isLast, name, rank }: Props) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: rank * 0.1 }}
       >
-        {isLast ? (
-          <span />
-        ) : (
-          <img src={getRankImage(rank)} alt="Rank image" height={boardTileSize * 1.2} />
-        )}
+        <span className={styles.rankBadge}>{getOrdinalRank(rank)}</span>
         <span
           className={styles.playerColourDot}
           style={{ backgroundColor: playerColours[colour] }}
         ></span>
         <span className={styles.gameFinishPlayerName}>{name}</span>
         <span className={styles.gameFinishTime}>
-          {isLast ? '' : getTimeString(gameStartTime, playerFinishTime, gameInactiveTime)}
+          {isLast ? '--:--' : getTimeString(gameStartTime, playerFinishTime, gameInactiveTime)}
         </span>
       </motion.div>
     </AnimatePresence>
