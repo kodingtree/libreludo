@@ -34,11 +34,11 @@ const SOUND_SEQUENCES: Record<TSoundEffect, TNote[]> = {
 };
 
 const SOUND_VOLUMES: Record<TSoundEffect, number> = {
-  diceRoll: 0.35,
-  pieceMove: 0.35,
-  pieceCapture: 0.35,
-  pieceReturn: 0.35,
-  pieceHome: 0.35,
+  diceRoll: 1,
+  pieceMove: 1,
+  pieceCapture: 1,
+  pieceReturn: 1,
+  pieceHome: 1,
 };
 
 let audioContext: AudioContext | null = null;

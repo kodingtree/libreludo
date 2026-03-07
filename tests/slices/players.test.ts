@@ -80,6 +80,13 @@ describe('Test players slice reducers', () => {
       const newState = playersReducer(initData, changeTurn());
       expect(newState.currentPlayerColour).toBe(initData.playerSequence[0]);
     });
+    it('should select the correct next player when currentPlayerColour was removed from playerSequence', () => {
+      const initData = cloneDeep(initialState);
+      initData.playerSequence = ['blue', 'green'];
+      initData.currentPlayerColour = 'red';
+      const newState = playersReducer(initData, changeTurn());
+      expect(newState.currentPlayerColour).toBe('green');
+    });
   });
   describe('setPlayerSequence', () => {
     it.each(Object.keys(playerSequences) as TPlayerCount[])(

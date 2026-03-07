@@ -45,6 +45,8 @@ export function getToken(state: TPlayerState, colour: TPlayerColour, id: number)
   return token;
 }
 
+const turnOrder: TPlayerColour[] = ['blue', 'red', 'green', 'yellow'];
+
 const reducers = {
   registerNewPlayer: (
     state: TPlayerState,
@@ -81,15 +83,37 @@ const reducers = {
 
   changeTurn: (state: TPlayerState) => {
     const { currentPlayerColour, playerSequence } = state;
+    if (playerSequence.length === 0) {
+      if (!currentPlayerColour) state.currentPlayerColour = 'blue';
+      return;
+    }
     if (!currentPlayerColour) {
-      state.currentPlayerColour = 'blue';
+      state.currentPlayerColour = playerSequence[0];
       return;
     }
     const currentPlayerIndex = playerSequence.indexOf(currentPlayerColour);
-    const nextPlayerIndex =
-      currentPlayerIndex === playerSequence.length - 1 ? 0 : currentPlayerIndex + 1;
+    if (currentPlayerIndex !== -1) {
+      const nextPlayerIndex =
+        currentPlayerIndex === playerSequence.length - 1 ? 0 : currentPlayerIndex + 1;
+      state.currentPlayerColour = playerSequence[nextPlayerIndex];
+      return;
+    }
 
-    state.currentPlayerColour = playerSequence[nextPlayerIndex];
+    const currentTurnOrderIndex = turnOrder.indexOf(currentPlayerColour);
+    if (currentTurnOrderIndex === -1) {
+      state.currentPlayerColour = playerSequence[0];
+      return;
+    }
+
+    for (let i = 1; i <= turnOrder.length; i++) {
+      const nextColour = turnOrder[(currentTurnOrderIndex + i) % turnOrder.length];
+      if (playerSequence.includes(nextColour)) {
+        state.currentPlayerColour = nextColour;
+        return;
+      }
+    }
+
+    state.currentPlayerColour = playerSequence[0];
   },
 
   setPlayerSequence: (
