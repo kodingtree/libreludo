@@ -65,6 +65,9 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
     players,
     playerFinishOrder,
   } = useSelector((state: RootState) => state.players);
+  const { autoRollAndMoveSinglePieceForHumans } = useSelector(
+    (state: RootState) => state.session
+  );
   const { diceNumber, isPlaceholderShowing } =
     useSelector((state: RootState) => state.dice.dice.find((d) => d.colour === colour)) ?? {};
 
@@ -72,7 +75,7 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
     () => isAnyTokenActiveOfColour(colour, players),
     [colour, players]
   );
-  const isBot = players.find((p) => p.colour === colour)?.isBot;
+  const isBot = players.find((p) => p.colour === colour)?.isBot ?? false;
   const rank = playerFinishOrder.findIndex((p) => p.colour === colour) + 1;
   const isCurrentPlayer = currentPlayer === colour;
   const isDiceDisabled =
@@ -81,7 +84,8 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
     isAnyTokenMoving ||
     isGameEnded ||
     isPlaceholderShowing ||
-    isBot;
+    isBot ||
+    (autoRollAndMoveSinglePieceForHumans && !isBot);
 
   const handleDiceClick = useCallback(() => {
     if (isDiceDisabled) return;

@@ -26,7 +26,10 @@ type Props = {
 function Token({ colour, id, tokenClickData }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const { tokenHeight, tokenWidth } = useSelector((state: RootState) => state.board);
-  const { players } = useSelector((state: RootState) => state.players);
+  const { players, currentPlayerColour, isAnyTokenMoving } = useSelector(
+    (state: RootState) => state.players
+  );
+  const { awaitingManualMoveColour } = useSelector((state: RootState) => state.session);
   const tokenClickDataRef = useRef(tokenClickData);
   const [isCurrentlyFocused, setIsCurrentlyFocused] = useState(false);
   const tokenElRef = useRef<HTMLButtonElement | null>(null);
@@ -47,6 +50,7 @@ function Token({ colour, id, tokenClickData }: Props) {
   const moveAndCapture = useMoveAndCaptureToken();
 
   const unlock = () => {
+    if (!isBot) dispatch(setAwaitingManualMoveColour(null));
     dispatch(setIsAnyTokenMoving(true));
     setTokenTransitionTime(FORWARD_TOKEN_TRANSITION_TIME, token);
     dispatch(unlockAndAlignTokens({ colour, id }));
@@ -57,7 +61,15 @@ function Token({ colour, id, tokenClickData }: Props) {
   };
 
   const executeTokenMove = useCallback(async () => {
-    if (!isActive || diceNumber === -1 || !diceNumber) return;
+    if (
+      !isActive ||
+      diceNumber === -1 ||
+      !diceNumber ||
+      colour !== currentPlayerColour ||
+      isAnyTokenMoving ||
+      (awaitingManualMoveColour !== null && awaitingManualMoveColour !== colour)
+    )
+      return;
     if (!isBot) dispatch(setAwaitingManualMoveColour(null));
 
     const moveData = await moveAndCapture(token, diceNumber);
@@ -67,7 +79,19 @@ function Token({ colour, id, tokenClickData }: Props) {
     if ((diceNumber !== 6 || numberOfConsecutiveSix >= 3) && !isCaptured && !hasTokenReachedHome) {
       return dispatch(changeTurnThunk(moveAndCapture));
     }
-  }, [diceNumber, dispatch, isActive, isBot, moveAndCapture, numberOfConsecutiveSix, token]);
+  }, [
+    awaitingManualMoveColour,
+    colour,
+    currentPlayerColour,
+    diceNumber,
+    dispatch,
+    isActive,
+    isAnyTokenMoving,
+    isBot,
+    moveAndCapture,
+    numberOfConsecutiveSix,
+    token,
+  ]);
 
   useEffect(() => {
     const prevClickData = tokenClickDataRef.current;
@@ -81,7 +105,11 @@ function Token({ colour, id, tokenClickData }: Props) {
 
   const handleTokenClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     if (e.detail === 0) e.stopPropagation();
-    if (isLocked && isActive && diceNumber !== -1 && diceNumber) unlock();
+    if (isLocked && isActive && diceNumber !== -1 && diceNumber) {
+      unlock();
+      tokenElRef.current?.blur?.();
+      return;
+    }
     tokenElRef.current?.blur?.();
     executeTokenMove();
   };

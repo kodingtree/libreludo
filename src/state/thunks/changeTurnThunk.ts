@@ -10,8 +10,11 @@ import { unlockAndAlignTokens } from './unlockAndAlignTokens';
 
 export function changeTurnThunk(moveAndCapture: ReturnType<typeof useMoveAndCaptureToken>) {
   return (dispatch: AppDispatch, getState: () => RootState) => {
-    if (getState().players.isGameEnded) return;
-    const { awaitingManualMoveColour } = getState().session;
+    const state = getState();
+    if (state.players.isGameEnded) return;
+    const { awaitingManualMoveColour } = state.session;
+    const hasAnyActiveToken = state.players.players.some((p) => p.tokens.some((t) => t.isActive));
+    if (state.players.isAnyTokenMoving || hasAnyActiveToken) return;
     if (awaitingManualMoveColour) return;
 
     dispatch(changeTurn());

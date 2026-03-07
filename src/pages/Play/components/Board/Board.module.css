@@ -15,3 +15,8 @@
     --board-side-length: 85vw;
   }
 }
+@media only screen and (max-width: 1024px) {
+  .board {
+    --board-side-length: calc(100vw - 1px);
+  }
+}

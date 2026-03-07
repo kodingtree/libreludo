@@ -67,11 +67,12 @@ function Board({ onDiceClick: onDiceRoll }: Props) {
 
     const coords: TCoordinate = { x: coordX, y: coordY };
 
-    const tokenToMove = tokensWithCoord(coords, players).filter(
+    const tokensInCoord = tokensWithCoord(coords, players).filter(
       (t) => t.colour === currentPlayerColour
-    )[0];
+    );
+    const tokenToMove = tokensInCoord.find((t) => t.isActive) ?? tokensInCoord[0];
 
-    if (!tokenToMove || tokenToMove.isLocked) return;
+    if (!tokenToMove || !tokenToMove.isActive || tokenToMove.isLocked) return;
 
     setTokenClickData({
       timestamp: Date.now(),
