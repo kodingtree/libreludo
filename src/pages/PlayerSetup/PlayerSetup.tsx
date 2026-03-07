@@ -47,6 +47,20 @@ function PlayerSetup() {
     () => playerSequences[playerCountToWord(playerCount)],
     [playerCount]
   );
+  const playersDataWithBotLabels = useMemo(() => {
+    const selectedPlayers = playersData.slice(0, playerCount);
+    const botCount = selectedPlayers.filter((p) => p.isBot).length;
+    let botNumber = 0;
+
+    return playersData.map((player, index) => {
+      if (index >= playerCount || !player.isBot) return player;
+      botNumber++;
+      return {
+        ...player,
+        name: botCount > 1 ? `Bot ${botNumber}` : 'Bot',
+      };
+    });
+  }, [playerCount, playersData]);
 
   useEffect(() => {
     document.title = 'LibreLudo - Player Setup';
@@ -69,9 +83,9 @@ function PlayerSetup() {
 
   const handlePlayBtnClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
-    const playerInitData = playersData.slice(0, playerCount);
+    const playerInitData = playersDataWithBotLabels.slice(0, playerCount);
     const isAnyNameEmpty = playerInitData.some(
-      (d) => d.name === '' || [...d.name].every((c) => c === ' ')
+      (d) => !d.isBot && (d.name === '' || [...d.name].every((c) => c === ' '))
     );
     if (isAnyNameEmpty)
       return toast('Player name must not be empty', {
@@ -117,8 +131,8 @@ function PlayerSetup() {
           {playerSequence.map((c, index) => (
             <PlayerInput
               colour={c}
-              name={playersData[index].name}
-              isBot={playersData[index].isBot}
+              name={playersDataWithBotLabels[index].name}
+              isBot={playersDataWithBotLabels[index].isBot}
               onBotStatusChange={(isBot) =>
                 setPlayersData(
                   playersData.map((d, i) =>
@@ -126,7 +140,8 @@ function PlayerSetup() {
                       ? {
                           ...d,
                           isBot,
-                          name: isBot ? 'Bot' : d.name === 'Bot' ? `Player ${index + 1}` : d.name,
+                          name:
+                            !isBot && /^Bot(?: \d+)?$/i.test(d.name) ? `Player ${index + 1}` : d.name,
                         }
                       : d
                   )
