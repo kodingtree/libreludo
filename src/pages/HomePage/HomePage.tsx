@@ -37,7 +37,7 @@ function HomePage() {
       <main className={styles.homePage}>
         <section className={styles.welcome}>
           <h1>
-            <span>Welcome to</span> LibreLudo
+            <span>Ludo by Rizwan Shaikh</span> 
           </h1>
           <p>Roll the dice, compete with friends, and send your tokens home first.</p>
           <nav className={styles.ctaButtons}>
