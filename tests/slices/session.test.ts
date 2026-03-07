@@ -3,6 +3,7 @@ import {
   clearSessionState,
   initialState,
   addToGameInactiveTime,
+  setAutoRollAndMoveSinglePieceForHumans,
   setGameStartTime,
 } from '../../src/state/slices/sessionSlice';
 import { cloneDeep } from 'lodash-es';
@@ -24,11 +25,19 @@ describe('Test players slice reducers', () => {
       expect(newState.gameInactiveTime).toBe(25);
     });
   });
+  describe('setAutoRollAndMoveSinglePieceForHumans', () => {
+    it('should set auto roll and single movable piece mode', () => {
+      const initState = cloneDeep(initialState);
+      const newState = sessionReducer(initState, setAutoRollAndMoveSinglePieceForHumans(true));
+      expect(newState.autoRollAndMoveSinglePieceForHumans).toBe(true);
+    });
+  });
   describe('clearSessionState', () => {
     it('should clear session state', () => {
       const initState = cloneDeep(initialState);
       initState.gameStartTime = 248;
       initState.gameInactiveTime = 293;
+      initState.autoRollAndMoveSinglePieceForHumans = true;
       const newState = sessionReducer(initState, clearSessionState());
       expect(newState).toEqual(initialState);
     });

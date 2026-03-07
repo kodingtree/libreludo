@@ -27,3 +27,25 @@
 .exit-btn:focus-visible {
   background-color: #dc0000;
 }
+.auto-play-toggle {
+  position: absolute;
+  bottom: calc(var(--board-tile-size) * 0.15);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--board-tile-size) * 0.2);
+  padding: calc(var(--board-tile-size) * 0.14) calc(var(--board-tile-size) * 0.24);
+  border-radius: calc(var(--board-tile-size) * 0.22);
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: calc(var(--board-tile-size) * 0.26);
+  font-weight: 600;
+  user-select: none;
+  z-index: 2;
+}
+.auto-play-toggle > input {
+  height: calc(var(--board-tile-size) * 0.35);
+  width: calc(var(--board-tile-size) * 0.35);
+  margin: 0;
+}

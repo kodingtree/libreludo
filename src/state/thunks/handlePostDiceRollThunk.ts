@@ -3,6 +3,7 @@ import {
   deactivateAllTokens,
   incrementNumberOfConsecutiveSix,
   resetNumberOfConsecutiveSix,
+  setIsAnyTokenMoving,
 } from '../slices/playersSlice';
 import { type TPlayerColour } from '../../types';
 import type { AppDispatch, RootState } from '../store';
@@ -12,11 +13,19 @@ import type { useMoveAndCaptureToken } from '../../hooks/useMoveAndCaptureToken'
 import type { TMoveData } from '../../types/tokens';
 import { sleep } from '../../utils/sleep';
 import { isAnyTokenActiveOfColour, isTokenMovable } from '../../game/tokens/logic';
+import { setTokenTransitionTime } from '../../utils/setTokenTransitionTime';
+import { FORWARD_TOKEN_TRANSITION_TIME } from '../../game/tokens/constants';
+import { unlockAndAlignTokens } from './unlockAndAlignTokens';
+
+type THandlePostDiceRollOptions = {
+  autoMoveSinglePieceForHuman?: boolean;
+};
 
 export const handlePostDiceRollThunk = (
   colour: TPlayerColour,
   diceNumber: number,
-  moveAndCapture: ReturnType<typeof useMoveAndCaptureToken>
+  moveAndCapture: ReturnType<typeof useMoveAndCaptureToken>,
+  options: THandlePostDiceRollOptions = {}
 ) => {
   return async (
     dispatch: AppDispatch,
@@ -38,6 +47,36 @@ export const handlePostDiceRollThunk = (
       dispatch(changeTurnThunk(moveAndCapture));
       return { moveData: null, shouldContinue: false };
     }
+    const shouldAutoMoveSinglePieceForHuman =
+      !!options.autoMoveSinglePieceForHuman && !player.isBot;
+    const activeTokens = player.tokens.filter((t) => t.isActive);
+
+    if (shouldAutoMoveSinglePieceForHuman && activeTokens.length === 1) {
+      const onlyToken = activeTokens[0];
+      if (onlyToken.isLocked && diceNumber === 6) {
+        dispatch(setIsAnyTokenMoving(true));
+        setTokenTransitionTime(FORWARD_TOKEN_TRANSITION_TIME, onlyToken);
+        dispatch(unlockAndAlignTokens({ colour, id: onlyToken.id }));
+        dispatch(deactivateAllTokens(colour));
+        setTimeout(() => dispatch(setIsAnyTokenMoving(false)), FORWARD_TOKEN_TRANSITION_TIME);
+        return { shouldContinue: true, moveData: null };
+      }
+      const moveData = await moveAndCapture(onlyToken, diceNumber);
+      if (!moveData) {
+        dispatch(changeTurnThunk(moveAndCapture));
+        return { shouldContinue: false, moveData };
+      }
+      const { hasTokenReachedHome, isCaptured, hasPlayerWon } = moveData;
+      if (hasPlayerWon) {
+        dispatch(changeTurnThunk(moveAndCapture));
+        return { shouldContinue: false, moveData: null };
+      }
+      if (!hasTokenReachedHome && !isCaptured && diceNumber !== 6) {
+        dispatch(changeTurnThunk(moveAndCapture));
+        return { shouldContinue: false, moveData: null };
+      }
+      return { shouldContinue: true, moveData };
+    }
 
     const areUnlockableTokensPresent =
       diceNumber === 6 && player.tokens.some((t) => areCoordsEqual(t.coordinates, t.initialCoords));
@@ -51,7 +90,7 @@ export const handlePostDiceRollThunk = (
         ? false
         : movableTokens.every((t) => areCoordsEqual(movableTokens[0].coordinates, t.coordinates));
 
-    if (areAllTokensInSameCoord) {
+    if (areAllTokensInSameCoord && !shouldAutoMoveSinglePieceForHuman) {
       const moveData = await moveAndCapture(movableTokens[0], diceNumber);
       if (!moveData) {
         if (player.isBot) await sleep(500);
