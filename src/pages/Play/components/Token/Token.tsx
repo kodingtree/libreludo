@@ -12,6 +12,7 @@ import { useMoveAndCaptureToken } from '../../../../hooks/useMoveAndCaptureToken
 import { unlockAndAlignTokens } from '../../../../state/thunks/unlockAndAlignTokens';
 import { playerColours } from '../../../../game/players/constants';
 import { FORWARD_TOKEN_TRANSITION_TIME } from '../../../../game/tokens/constants';
+import { setAwaitingManualMoveColour } from '../../../../state/slices/sessionSlice';
 import styles from './Token.module.css';
 import clsx from 'clsx';
 import { getTokenDOMId } from '../../../../game/tokens/logic';
@@ -29,7 +30,7 @@ function Token({ colour, id, tokenClickData }: Props) {
   const tokenClickDataRef = useRef(tokenClickData);
   const [isCurrentlyFocused, setIsCurrentlyFocused] = useState(false);
   const tokenElRef = useRef<HTMLButtonElement | null>(null);
-  const { numberOfConsecutiveSix, tokens: playerTokens } = useMemo(
+  const { numberOfConsecutiveSix, isBot, tokens: playerTokens } = useMemo(
     () => players.find((v) => v.colour === colour),
     [players, colour]
   ) as TPlayer;
@@ -57,6 +58,7 @@ function Token({ colour, id, tokenClickData }: Props) {
 
   const executeTokenMove = useCallback(async () => {
     if (!isActive || diceNumber === -1 || !diceNumber) return;
+    if (!isBot) dispatch(setAwaitingManualMoveColour(null));
 
     const moveData = await moveAndCapture(token, diceNumber);
     if (!moveData) return;
@@ -65,7 +67,7 @@ function Token({ colour, id, tokenClickData }: Props) {
     if ((diceNumber !== 6 || numberOfConsecutiveSix >= 3) && !isCaptured && !hasTokenReachedHome) {
       return dispatch(changeTurnThunk(moveAndCapture));
     }
-  }, [diceNumber, dispatch, isActive, moveAndCapture, numberOfConsecutiveSix, token]);
+  }, [diceNumber, dispatch, isActive, isBot, moveAndCapture, numberOfConsecutiveSix, token]);
 
   useEffect(() => {
     const prevClickData = tokenClickDataRef.current;

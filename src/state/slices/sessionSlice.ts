@@ -1,15 +1,18 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { TPlayerColour } from '../../types';
 
 type TSessionState = {
   gameStartTime: number;
   gameInactiveTime: number;
   autoRollAndMoveSinglePieceForHumans: boolean;
+  awaitingManualMoveColour: TPlayerColour | null;
 };
 
 export const initialState: TSessionState = {
   gameInactiveTime: 0,
   gameStartTime: 0,
   autoRollAndMoveSinglePieceForHumans: false,
+  awaitingManualMoveColour: null,
 };
 
 const reducers = {
@@ -24,6 +27,13 @@ const reducers = {
     action: PayloadAction<boolean>
   ) => {
     state.autoRollAndMoveSinglePieceForHumans = action.payload;
+    if (!action.payload) state.awaitingManualMoveColour = null;
+  },
+  setAwaitingManualMoveColour: (
+    state: TSessionState,
+    action: PayloadAction<TPlayerColour | null>
+  ) => {
+    state.awaitingManualMoveColour = action.payload;
   },
   clearSessionState: () => structuredClone(initialState),
 };
@@ -38,6 +48,7 @@ export const {
   setGameStartTime,
   addToGameInactiveTime,
   setAutoRollAndMoveSinglePieceForHumans,
+  setAwaitingManualMoveColour,
   clearSessionState,
 } = sessionSlice.actions;
 

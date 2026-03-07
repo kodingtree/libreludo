@@ -16,6 +16,7 @@ import { isAnyTokenActiveOfColour, isTokenMovable } from '../../game/tokens/logi
 import { setTokenTransitionTime } from '../../utils/setTokenTransitionTime';
 import { FORWARD_TOKEN_TRANSITION_TIME } from '../../game/tokens/constants';
 import { unlockAndAlignTokens } from './unlockAndAlignTokens';
+import { setAwaitingManualMoveColour } from '../slices/sessionSlice';
 
 type THandlePostDiceRollOptions = {
   autoMoveSinglePieceForHuman?: boolean;
@@ -43,6 +44,7 @@ export const handlePostDiceRollThunk = (
     if (player.numberOfConsecutiveSix === 3) {
       dispatch(resetNumberOfConsecutiveSix(colour));
       dispatch(deactivateAllTokens(colour));
+      dispatch(setAwaitingManualMoveColour(null));
       if (player.isBot) await sleep(500);
       dispatch(changeTurnThunk(moveAndCapture));
       return { moveData: null, shouldContinue: false };
@@ -50,6 +52,9 @@ export const handlePostDiceRollThunk = (
     const shouldAutoMoveSinglePieceForHuman =
       !!options.autoMoveSinglePieceForHuman && !player.isBot;
     const activeTokens = player.tokens.filter((t) => t.isActive);
+    if (shouldAutoMoveSinglePieceForHuman) {
+      dispatch(setAwaitingManualMoveColour(activeTokens.length > 1 ? colour : null));
+    }
 
     if (shouldAutoMoveSinglePieceForHuman && activeTokens.length === 1) {
       const onlyToken = activeTokens[0];
@@ -63,15 +68,18 @@ export const handlePostDiceRollThunk = (
       }
       const moveData = await moveAndCapture(onlyToken, diceNumber);
       if (!moveData) {
+        dispatch(setAwaitingManualMoveColour(null));
         dispatch(changeTurnThunk(moveAndCapture));
         return { shouldContinue: false, moveData };
       }
       const { hasTokenReachedHome, isCaptured, hasPlayerWon } = moveData;
       if (hasPlayerWon) {
+        dispatch(setAwaitingManualMoveColour(null));
         dispatch(changeTurnThunk(moveAndCapture));
         return { shouldContinue: false, moveData: null };
       }
       if (!hasTokenReachedHome && !isCaptured && diceNumber !== 6) {
+        dispatch(setAwaitingManualMoveColour(null));
         dispatch(changeTurnThunk(moveAndCapture));
         return { shouldContinue: false, moveData: null };
       }
@@ -109,6 +117,7 @@ export const handlePostDiceRollThunk = (
       return { shouldContinue: true, moveData };
     }
     if (!isAnyTokenActiveOfColour(colour, players)) {
+      dispatch(setAwaitingManualMoveColour(null));
       if (player.isBot) await sleep(500);
       dispatch(changeTurnThunk(moveAndCapture));
       return { shouldContinue: false, moveData: null };

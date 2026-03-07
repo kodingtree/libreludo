@@ -39,7 +39,9 @@ function Game({ initData }: Props) {
     players,
     isAnyTokenMoving,
   } = useSelector((state: RootState) => state.players);
-  const { autoRollAndMoveSinglePieceForHumans } = useSelector((state: RootState) => state.session);
+  const { autoRollAndMoveSinglePieceForHumans, awaitingManualMoveColour } = useSelector(
+    (state: RootState) => state.session
+  );
   const { dice } = useSelector((state: RootState) => state.dice);
   const playersRegisteredInitiallyRef = useRef(true);
   const gameInactiveStartTime = useRef(0);
@@ -103,6 +105,7 @@ function Game({ initData }: Props) {
     if (
       !autoRollAndMoveSinglePieceForHumans ||
       !currentPlayerColour ||
+      awaitingManualMoveColour !== null ||
       isGameEnded ||
       isAnyTokenMoving
     )
@@ -116,6 +119,7 @@ function Game({ initData }: Props) {
     dispatch(rollDiceThunk(currentPlayerColour, (diceNumber) => handleDiceRoll(currentPlayerColour, diceNumber)));
   }, [
     autoRollAndMoveSinglePieceForHumans,
+    awaitingManualMoveColour,
     currentPlayerColour,
     dice,
     dispatch,
