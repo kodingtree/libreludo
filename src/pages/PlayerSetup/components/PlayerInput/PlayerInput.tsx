@@ -25,6 +25,7 @@ function PlayerInput({ colour, isBot, name, onBotStatusChange, onNameChange }: P
         placeholder="Enter player name"
         className={styles.playerNameInput}
         value={name}
+        disabled={isBot}
         onChange={(e) => onNameChange(e.target.value.slice(0, MAX_PLAYER_NAME_LENGTH))}
       />
       <button

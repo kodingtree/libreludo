@@ -120,10 +120,22 @@ function PlayerSetup() {
               name={playersData[index].name}
               isBot={playersData[index].isBot}
               onBotStatusChange={(isBot) =>
-                setPlayersData(playersData.map((d, i) => (i === index ? { ...d, isBot } : d)))
+                setPlayersData(
+                  playersData.map((d, i) =>
+                    i === index
+                      ? {
+                          ...d,
+                          isBot,
+                          name: isBot ? 'Bot' : d.name === 'Bot' ? `Player ${index + 1}` : d.name,
+                        }
+                      : d
+                  )
+                )
               }
               onNameChange={(name) =>
-                setPlayersData(playersData.map((d, i) => (i === index ? { ...d, name } : d)))
+                setPlayersData(
+                  playersData.map((d, i) => (i === index && !d.isBot ? { ...d, name } : d))
+                )
               }
               key={index}
             />

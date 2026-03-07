@@ -60,7 +60,7 @@ function Game({ initData }: Props) {
       if (!playerSequence.length || !playersRegisteredInitiallyRef.current) return;
       dispatch(
         registerNewPlayer({
-          name: initData[i].name,
+          name: initData[i].isBot ? 'Bot' : initData[i].name,
           colour: playerSequence[i],
           isBot: initData[i].isBot,
         })
